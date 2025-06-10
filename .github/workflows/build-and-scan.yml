@@ -26,13 +26,30 @@ jobs:
           tags: ${{ matrix.service }}:latest
           load: true
 
+      # 🔍 Debug Steps
+      - name: List Docker images
+        run: docker images
+
+      - name: Show working directory
+        run: pwd
+
+      - name: List all files in workspace
+        run: ls -R /home/runner/work
+
+      - name: Show disk usage
+        run: df -h
+
+      - name: Print environment variables
+        run: env | sort
+
+      # 🛡️ Sysdig Image Scan
       - name: Scan Docker Image with Sysdig CLI Scanner
         uses: sysdiglabs/scan-action@v5
         with:
           image-tag: ${{ matrix.service }}:latest
           sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          sysdig-secure-url: ${{ secrets.SYSDIG_SECURE_URL }}
+          sysdig-secure-url: https://secure.sysdig.com
           mode: docker
-          cli-scanner-version: 1.8.1
+          cli-scanner-version: 1.7.3
           stop-on-failed-policy-eval: true
           stop-on-processing-error: true
