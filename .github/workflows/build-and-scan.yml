@@ -34,8 +34,11 @@ jobs:
       - name: Download Sysdig CLI Scanner
         run: |
           curl -sL -o sysdig-cli-scanner \
-            https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(uname -s | tr '[:upper:]' '[:lower:]')/amd64/sysdig-cli-scanner
+            https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/1.22.1/linux/amd64/sysdig-cli-scanner
           chmod +x sysdig-cli-scanner
+
+      - name: Check scanner binary
+        run: file sysdig-cli-scanner
 
       - name: Run Sysdig CLI Scanner
         run: |
