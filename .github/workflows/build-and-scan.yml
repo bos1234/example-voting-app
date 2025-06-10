@@ -6,12 +6,17 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  SYSDIG_SECURE_URL: https://api.au1.sysdig.com
+  SCAN_RESULT: scan-result.json
+
 jobs:
   build-and-scan:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         service: [vote, worker, result]
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -26,36 +31,22 @@ jobs:
           tags: ${{ matrix.service }}:latest
           load: true
 
-      # 🔍 Debug Steps
-      - name: List Docker images
-        run: docker images
+      - name: Download Sysdig CLI Scanner
+        run: |
+          curl -sL -o sysdig-cli-scanner \
+            https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(uname -s | tr '[:upper:]' '[:lower:]')/amd64/sysdig-cli-scanner
+          chmod +x sysdig-cli-scanner
 
-      - name: Show working directory
-        run: pwd
+      - name: Run Sysdig CLI Scanner
+        run: |
+          ./sysdig-cli-scanner \
+            --apiurl $SYSDIG_SECURE_URL \
+            --token ${{ secrets.SYSDIG_SECURE_TOKEN }} \
+            --json-scan-result=$SCAN_RESULT \
+            ${{ matrix.service }}:latest
 
-      - name: List all files in workspace
-        run: ls -R /home/runner/work
-
-      - name: Show disk usage
-        run: df -h
-
-      - name: Print environment variables
-        run: env | sort
-
-      # 🛡️ Sysdig Image Scan
-      - name: Scan Docker Image with Sysdig CLI Scanner
-        uses: sysdiglabs/scan-action@v5
-        with:
-          image-tag: ${{ matrix.service }}:latest
-          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          sysdig-secure-url: https://api.au1.sysdig.com
-          mode: vm
-          stop-on-failed-policy-eval: true
-          stop-on-processing-error: true
-
-      # 🧪 Print Sysdig scan logs for troubleshooting
-      - name: Print Sysdig scan logs
+      - name: Show scan results
         if: always()
         run: |
-          echo "=== Sysdig Scan Logs ==="
-          cat /home/runner/work/example-voting-app/example-voting-app/scan-logs || echo "No scan logs found"
+          echo "=== SCAN RESULTS ==="
+          cat $SCAN_RESULT || echo "No results"
