@@ -50,6 +50,6 @@ jobs:
           sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
           sysdig-secure-url: https://secure.sysdig.com
           mode: docker
-          cli-scanner-version: 1.7.3
+          cli-scanner-version: latest
           stop-on-failed-policy-eval: true
           stop-on-processing-error: true
