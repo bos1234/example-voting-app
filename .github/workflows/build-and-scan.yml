@@ -52,3 +52,10 @@ jobs:
           mode: vm
           stop-on-failed-policy-eval: true
           stop-on-processing-error: true
+
+      # 🧪 Print Sysdig scan logs for troubleshooting
+      - name: Print Sysdig scan logs
+        if: always()
+        run: |
+          echo "=== Sysdig Scan Logs ==="
+          cat /home/runner/work/example-voting-app/example-voting-app/scan-logs || echo "No scan logs found"
