@@ -48,7 +48,7 @@ jobs:
         with:
           image-tag: ${{ matrix.service }}:latest
           sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          sysdig-secure-url: https://secure.sysdig.com
+          sysdig-secure-url: ttps://secure.au1.sysdig.com
           mode: vm
           stop-on-failed-policy-eval: true
           stop-on-processing-error: true
