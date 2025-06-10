@@ -41,10 +41,11 @@ jobs:
         run: file sysdig-cli-scanner
 
       - name: Run Sysdig CLI Scanner
+        env:
+          SYSDIG_SECURE_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
         run: |
           ./sysdig-cli-scanner \
             --apiurl $SYSDIG_SECURE_URL \
-            --token ${{ secrets.SYSDIG_SECURE_TOKEN }} \
             --json-scan-result=$SCAN_RESULT \
             ${{ matrix.service }}:latest
 
