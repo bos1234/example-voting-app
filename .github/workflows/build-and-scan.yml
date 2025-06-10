@@ -1,0 +1,38 @@
+name: Build and Scan Voting App Services
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [vote, worker, result]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./${{ matrix.service }}
+          tags: ${{ matrix.service }}:latest
+          load: true
+
+      - name: Scan Docker Image with Sysdig CLI Scanner
+        uses: sysdiglabs/scan-action@v5
+        with:
+          image-tag: ${{ matrix.service }}:latest
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-url: ${{ secrets.SYSDIG_SECURE_URL }}
+          mode: vm
+          cli-scanner-version: 1.8.1
+          stop-on-failed-policy-eval: true
+          stop-on-processing-error: true
