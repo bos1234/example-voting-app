@@ -30,19 +30,22 @@ jobs:
           tags: ${{ matrix.service }}:latest
           load: true
 
-      - name: Create scan logs directory
-        run: mkdir -p scan-logs
+      - name: Download Sysdig CLI Scanner
+        run: |
+          curl -sL -o sysdig-cli-scanner \
+            https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/1.22.3/linux/amd64/sysdig-cli-scanner
+          chmod +x sysdig-cli-scanner
 
       - name: Run Sysdig CLI Scanner on Image
-        uses: sysdiglabs/scan-action@v6
-        with:
-          cli-scanner-version: 1.22.3
-          image-tag: ${{ matrix.service }}:latest
-          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          sysdig-secure-url: ${{ env.SYSDIG_SECURE_URL }}
-          stop-on-failed-policy-eval: true
-          stop-on-processing-error: true
-          extra-parameters: "--log-path=scan-logs/scan.log"
+        env:
+          SECURE_API_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+        run: |
+          mkdir -p scan-logs
+          ./sysdig-cli-scanner \
+            --apiurl $SYSDIG_SECURE_URL \
+            --output=json \
+            ${{ matrix.service }}:latest \
+            > scan-logs/scan.log 2>&1
 
       - name: Upload scan logs if available
         if: always()
