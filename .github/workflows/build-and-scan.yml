@@ -30,6 +30,9 @@ jobs:
           tags: ${{ matrix.service }}:latest
           load: true
 
+      - name: Create scan logs directory
+        run: mkdir -p scan-logs
+
       - name: Run Sysdig CLI Scanner on Image
         uses: sysdiglabs/scan-action@v6
         with:
@@ -39,6 +42,7 @@ jobs:
           sysdig-secure-url: ${{ env.SYSDIG_SECURE_URL }}
           stop-on-failed-policy-eval: true
           stop-on-processing-error: true
+          extra-parameters: "--log-path=scan-logs/scan.log"
 
       - name: Upload scan logs if available
         if: always()
