@@ -42,8 +42,8 @@ jobs:
 
       - name: Upload scan logs if available
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: scan-logs-${{ matrix.service }}
-          path: /home/runner/work/example-voting-app/example-voting-app/scan-logs
+          path: scan-logs/
           if-no-files-found: ignore
