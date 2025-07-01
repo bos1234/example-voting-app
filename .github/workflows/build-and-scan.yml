@@ -8,7 +8,6 @@ on:
 
 env:
   SYSDIG_SECURE_URL: https://api.au1.sysdig.com
-  SCAN_RESULT: scan-result.json
 
 jobs:
   build-and-scan:
@@ -34,16 +33,17 @@ jobs:
       - name: Run Sysdig CLI Scanner on Image
         uses: sysdiglabs/scan-action@v6
         with:
-          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
-          sysdig-secure-url: ${{ env.SYSDIG_SECURE_URL }}
           cli-scanner-version: 1.22.3
           image-tag: ${{ matrix.service }}:latest
-          json-scan-result-file: ${{ env.SCAN_RESULT }}
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-url: ${{ env.SYSDIG_SECURE_URL }}
           stop-on-failed-policy-eval: true
           stop-on-processing-error: true
 
-      - name: Show image scan results
+      - name: Upload scan logs if available
         if: always()
-        run: |
-          echo "=== IMAGE SCAN RESULTS ==="
-          cat $SCAN_RESULT || echo "No results"
+        uses: actions/upload-artifact@v3
+        with:
+          name: scan-logs-${{ matrix.service }}
+          path: /home/runner/work/example-voting-app/example-voting-app/scan-logs
+          if-no-files-found: ignore
